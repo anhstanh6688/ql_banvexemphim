@@ -4,6 +4,7 @@ class Users extends Controller
     private $orderModel;
     private $ticketModel;
     private $userModel; // Add User Model
+    private $commentModel;
 
     public function __construct()
     {
@@ -12,8 +13,7 @@ class Users extends Controller
         }
         $this->orderModel = $this->model('Order');
         $this->ticketModel = $this->model('Ticket');
-        $this->orderModel = $this->model('Order');
-        $this->ticketModel = $this->model('Ticket');
+
         $this->userModel = $this->model('User');
         $this->commentModel = $this->model('Comment');
     }
