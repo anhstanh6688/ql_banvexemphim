@@ -25,20 +25,37 @@ class Movies extends Controller
         if ($page < 1)
             $page = 1;
 
-        $total_movies = $this->movieModel->getMovieCount();
+        // Filters
+        $filters = [
+            'search' => isset($_GET['search']) ? trim($_GET['search']) : '',
+            'genre' => isset($_GET['genre']) ? trim($_GET['genre']) : '',
+            'status' => isset($_GET['status']) ? trim($_GET['status']) : ''
+        ];
+
+        // Fetch Genres for dropdown
+        $genres = $this->movieModel->getGenres();
+
+        // Get Filtered Counts
+        $total_movies = $this->movieModel->getMoviesFilteredCount($filters);
         $total_pages = ceil($total_movies / $limit);
         $offset = ($page - 1) * $limit;
 
-        // Fetch paginated
-        $movies = $this->movieModel->getMoviesPaginated($limit, $offset);
+        // Get Movies
+        $movies = $this->movieModel->getMoviesFilteredPaginated($filters, $limit, $offset);
 
         $data = [
             'movies' => $movies,
             'current_page' => $page,
             'total_pages' => $total_pages,
-            'total_movies' => $total_movies
+            'total_movies' => $total_movies,
+            'filters' => $filters,
+            'genres' => $genres
         ];
-        $this->view('movies/index', $data);
+        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+            $this->view('movies/list_partial', $data);
+        } else {
+            $this->view('movies/index', $data);
+        }
     }
 
     public function add()

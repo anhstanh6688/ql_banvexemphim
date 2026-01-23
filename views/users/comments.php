@@ -105,21 +105,8 @@
 </div>
 
 <!-- Simple Delete Modal Script (Reusable) -->
-<script>
-    let targetFormId = null;
-    function setDeleteForm(formId) {
-        targetFormId = formId;
-    }
-
-    const confirmBtn = document.getElementById('confirmDeleteBtn');
-    if (confirmBtn) {
-        confirmBtn.addEventListener('click', function () {
-            if (targetFormId) {
-                document.getElementById(targetFormId).submit();
-            }
-        });
-    }
-</script>
+</div>
+</div>
 
 <!-- Delete Confirmation Modal (Available Globally) -->
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
@@ -143,5 +130,23 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let targetFormId = null;
+        window.setDeleteForm = function (formId) {
+            targetFormId = formId;
+        }
+
+        const confirmBtn = document.getElementById('confirmDeleteBtn');
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', function () {
+                if (targetFormId) {
+                    document.getElementById(targetFormId).submit();
+                }
+            });
+        }
+    });
+</script>
 
 <?php require APP_ROOT . '/views/inc/footer.php'; ?>

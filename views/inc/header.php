@@ -10,6 +10,6 @@
     <link rel="stylesheet" href="<?php echo URLROOT; ?>/css/style.css?v=<?php echo time(); ?>">
 </head>
 
-<body>
+<body class="d-flex flex-column min-vh-100">
     <?php require_once APP_ROOT . '/views/inc/navbar.php'; ?>
-    <div class="container mt-4">
+    <div class="container mt-4 mb-5">

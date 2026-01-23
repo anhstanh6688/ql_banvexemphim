@@ -64,6 +64,77 @@ class Showtime
         return $row->count;
     }
 
+    public function getFilteredShowtimesCount($filters)
+    {
+        $sql = "SELECT COUNT(*) as count 
+                FROM showtimes s
+                JOIN movies m ON s.movie_id = m.id
+                JOIN rooms r ON s.room_id = r.id
+                WHERE 1=1";
+
+        $params = [];
+
+        if (!empty($filters['search'])) {
+            $sql .= " AND m.title LIKE :search";
+            $params[':search'] = "%" . $filters['search'] . "%";
+        }
+
+        if (!empty($filters['room_id'])) {
+            $sql .= " AND s.room_id = :room_id";
+            $params[':room_id'] = $filters['room_id'];
+        }
+
+        if (!empty($filters['date'])) {
+            $sql .= " AND DATE(s.start_time) = :date";
+            $params[':date'] = $filters['date'];
+        }
+
+        $this->db->query($sql);
+        foreach ($params as $key => $value) {
+            $this->db->bind($key, $value);
+        }
+
+        $row = $this->db->single();
+        return $row->count;
+    }
+
+    public function getFilteredShowtimesPaginated($filters, $limit = 10, $offset = 0)
+    {
+        $sql = "SELECT s.*, m.title, r.name as room_name 
+                FROM showtimes s
+                JOIN movies m ON s.movie_id = m.id
+                JOIN rooms r ON s.room_id = r.id
+                WHERE 1=1";
+
+        $params = [];
+
+        if (!empty($filters['search'])) {
+            $sql .= " AND m.title LIKE :search";
+            $params[':search'] = "%" . $filters['search'] . "%";
+        }
+
+        if (!empty($filters['room_id'])) {
+            $sql .= " AND s.room_id = :room_id";
+            $params[':room_id'] = $filters['room_id'];
+        }
+
+        if (!empty($filters['date'])) {
+            $sql .= " AND DATE(s.start_time) = :date";
+            $params[':date'] = $filters['date'];
+        }
+
+        $sql .= " ORDER BY s.start_time DESC LIMIT :limit OFFSET :offset";
+
+        $this->db->query($sql);
+        foreach ($params as $key => $value) {
+            $this->db->bind($key, $value);
+        }
+        $this->db->bind(':limit', $limit, PDO::PARAM_INT);
+        $this->db->bind(':offset', $offset, PDO::PARAM_INT);
+
+        return $this->db->resultSet();
+    }
+
     // Get ALL Showtimes (Admin view - including past ones)
     public function getAllShowtimes()
     {

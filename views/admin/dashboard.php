@@ -38,7 +38,7 @@
     </div>
 </div>
 
-</div>
+
 
 <!-- Charts Section -->
 <div class="row mb-4">

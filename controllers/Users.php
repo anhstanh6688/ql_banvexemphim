@@ -39,8 +39,8 @@ class Users extends Controller
     {
         $order = $this->orderModel->getOrderById($orderId);
 
-        // Check ownership
-        if ($order->user_id != $_SESSION['user_id']) {
+        // Check ownership or Admin role
+        if ($order->user_id != $_SESSION['user_id'] && (!isset($_SESSION['user_role']) || $_SESSION['user_role'] != 'admin')) {
             redirect('users/history');
         }
 

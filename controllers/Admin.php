@@ -18,25 +18,39 @@ class Admin extends Controller
 
     public function orders()
     {
+        // Pagination
         $limit = 10;
         $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
         if ($page < 1)
             $page = 1;
 
-        $total_orders = $this->orderModel->getOrderCount();
+        // Filters
+        $filters = [
+            'search' => isset($_GET['search']) ? trim($_GET['search']) : '',
+            'date' => isset($_GET['date']) ? trim($_GET['date']) : ''
+        ];
+
+        // Get Filtered Data
+        $total_orders = $this->orderModel->getFilteredOrderCount($filters);
         $total_pages = ceil($total_orders / $limit);
         $offset = ($page - 1) * $limit;
 
-        $orders = $this->orderModel->getOrdersPaginated($limit, $offset);
+        $orders = $this->orderModel->getFilteredOrdersPaginated($filters, $limit, $offset);
 
         $data = [
             'orders' => $orders,
             'current_page' => $page,
             'total_pages' => $total_pages,
-            'total_orders' => $total_orders
+            'total_orders' => $total_orders,
+            'filters' => $filters
         ];
 
-        $this->view('admin/orders', $data);
+        // Check for AJAX
+        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+            $this->view('admin/orders_partial', $data);
+        } else {
+            $this->view('admin/orders', $data);
+        }
     }
 
     public function index()

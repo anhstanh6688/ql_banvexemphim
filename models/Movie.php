@@ -176,4 +176,83 @@ class Movie
         $this->db->bind(':offset', $offset, PDO::PARAM_INT);
         return $this->db->resultSet();
     }
+    public function getGenres()
+    {
+        $this->db->query('SELECT DISTINCT genre FROM movies WHERE genre IS NOT NULL AND genre != "" ORDER BY genre ASC');
+        return $this->db->resultSet();
+    }
+
+    public function getMoviesFilteredCount($filters)
+    {
+        $sql = "SELECT COUNT(*) as count FROM movies WHERE 1=1";
+        $params = [];
+
+        if (!empty($filters['search'])) {
+            $sql .= " AND title LIKE :search";
+            $params[':search'] = "%" . $filters['search'] . "%";
+        }
+
+        if (!empty($filters['genre'])) {
+            $sql .= " AND genre = :genre";
+            $params[':genre'] = $filters['genre'];
+        }
+
+        if (!empty($filters['status'])) {
+            // Derived Status Logic
+            if ($filters['status'] == 'coming_soon') {
+                $sql .= " AND release_date > NOW()";
+            } elseif ($filters['status'] == 'now_showing' || $filters['status'] == 'showing') {
+                $sql .= " AND id IN (SELECT DISTINCT movie_id FROM showtimes WHERE start_time >= NOW())";
+            } elseif ($filters['status'] == 'ended') {
+                // Strict definition: Released in past AND No future showtimes
+                $sql .= " AND release_date <= NOW() AND id NOT IN (SELECT DISTINCT movie_id FROM showtimes WHERE start_time >= NOW())";
+            }
+        }
+
+        $this->db->query($sql);
+        foreach ($params as $key => $value) {
+            $this->db->bind($key, $value);
+        }
+
+        $row = $this->db->single();
+        return $row->count;
+    }
+
+    public function getMoviesFilteredPaginated($filters, $limit = 5, $offset = 0)
+    {
+        $sql = "SELECT * FROM movies WHERE 1=1";
+        $params = [];
+
+        if (!empty($filters['search'])) {
+            $sql .= " AND title LIKE :search";
+            $params[':search'] = "%" . $filters['search'] . "%";
+        }
+
+        if (!empty($filters['genre'])) {
+            $sql .= " AND genre = :genre";
+            $params[':genre'] = $filters['genre'];
+        }
+
+        if (!empty($filters['status'])) {
+            // Derived Status Logic
+            if ($filters['status'] == 'coming_soon') {
+                $sql .= " AND release_date > NOW()";
+            } elseif ($filters['status'] == 'now_showing' || $filters['status'] == 'showing') {
+                $sql .= " AND id IN (SELECT DISTINCT movie_id FROM showtimes WHERE start_time >= NOW())";
+            } elseif ($filters['status'] == 'ended') {
+                $sql .= " AND release_date <= NOW() AND id NOT IN (SELECT DISTINCT movie_id FROM showtimes WHERE start_time >= NOW())";
+            }
+        }
+
+        $sql .= " ORDER BY id DESC LIMIT :limit OFFSET :offset";
+
+        $this->db->query($sql);
+        foreach ($params as $key => $value) {
+            $this->db->bind($key, $value);
+        }
+        $this->db->bind(':limit', $limit, PDO::PARAM_INT);
+        $this->db->bind(':offset', $offset, PDO::PARAM_INT);
+
+        return $this->db->resultSet();
+    }
 }

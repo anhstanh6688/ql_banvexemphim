@@ -1,105 +1,124 @@
 <?php require APP_ROOT . '/views/inc/header.php'; ?>
 
-<div class="page-header">
+<div class="page-header text-center">
     <div class="container">
-        <div class="row align-items-center">
-            <div class="col-md-6">
-                <h1>Manage Orders</h1>
-                <p class="lead mb-0">List of all booking transactions</p>
-            </div>
-            <div class="col-md-6 text-end">
-                <a href="<?php echo URLROOT; ?>/admin" class="btn btn-outline-light">
-                    <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
-                </a>
-            </div>
-        </div>
+        <h1>Manage Orders</h1>
+        <p class="lead mb-0">List of all booking transactions</p>
     </div>
 </div>
 
 <div class="container mt-4">
-    <div class="card shadow border-0">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="bg-light">
-                        <tr>
-                            <th class="ps-4">Order ID</th>
-                            <th>User</th>
-                            <th>Movie</th>
-                            <th>Showtime</th>
-                            <th>Amount</th>
-                            <th>Booked At</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($data['orders'] as $order): ?>
-                            <tr>
-                                <td class="ps-4 fw-bold">#
-                                    <?php echo $order->id; ?>
-                                </td>
-                                <td>
-                                    <?php echo $order->fullname; ?>
-                                </td>
-                                <td class="text-truncate" style="max-width: 200px;">
-                                    <?php echo $order->movie_title; ?>
-                                </td>
-                                <td>
-                                    <?php echo date('H:i d/m', strtotime($order->start_time)); ?>
-                                </td>
-                                <td class="fw-bold">
-                                    <?php echo number_format($order->total_amount); ?> đ
-                                </td>
-                                <td>
-                                    <?php echo date('d M Y H:i', strtotime($order->created_at)); ?>
-                                </td>
-                                <td><span class="badge bg-success">Paid</span></td>
-                                <td>
-                                    <a href="<?php echo URLROOT; ?>/users/order_details/<?php echo $order->id; ?>"
-                                        class="btn btn-sm btn-outline-info" title="View Details">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                        <?php if (empty($data['orders'])): ?>
-                            <tr>
-                                <td colspan="8" class="text-center py-5 text-muted">No orders found.</td>
-                            </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
+
+    <!-- Filter Form & Actions -->
+    <div class="row mb-4">
+        <div class="col-md-9">
+            <form action="<?php echo URLROOT; ?>/admin/orders" method="get"
+                class="d-flex align-items-center flex-wrap gap-2">
+                <input type="text" name="search" class="form-control" placeholder="Search Order ID, Name, Movie..."
+                    value="<?php echo isset($data['filters']['search']) ? $data['filters']['search'] : ''; ?>"
+                    style="max-width: 300px;">
+
+                <input type="date" name="date" class="form-control"
+                    value="<?php echo isset($data['filters']['date']) ? $data['filters']['date'] : ''; ?>"
+                    style="max-width: 150px;" title="Filter by Booking Date">
+
+                <button type="submit" class="btn btn-outline-primary"><i class="fas fa-filter"></i> Filter</button>
+
+                <?php if (!empty($data['filters']['search']) || !empty($data['filters']['date'])): ?>
+                    <a href="<?php echo URLROOT; ?>/admin/orders" class="btn btn-outline-secondary" title="Clear Filters"><i
+                            class="fas fa-times"></i></a>
+                <?php endif; ?>
+            </form>
         </div>
-        <div class="card-footer bg-light">
-            <!-- Pagination -->
-            <?php if (isset($data['total_pages']) && $data['total_pages'] > 1): ?>
-                <nav aria-label="Order navigation">
-                    <ul class="pagination justify-content-center mb-0">
-                        <li class="page-item <?php echo $data['current_page'] <= 1 ? 'disabled' : ''; ?>">
-                            <a class="page-link"
-                                href="<?php echo URLROOT; ?>/admin/orders?page=<?php echo $data['current_page'] - 1; ?>">Previous</a>
-                        </li>
-
-                        <?php for ($i = 1; $i <= $data['total_pages']; $i++): ?>
-                            <li class="page-item <?php echo $data['current_page'] == $i ? 'active' : ''; ?>">
-                                <a class="page-link" href="<?php echo URLROOT; ?>/admin/orders?page=<?php echo $i; ?>">
-                                    <?php echo $i; ?>
-                                </a>
-                            </li>
-                        <?php endfor; ?>
-
-                        <li
-                            class="page-item <?php echo $data['current_page'] >= $data['total_pages'] ? 'disabled' : ''; ?>">
-                            <a class="page-link"
-                                href="<?php echo URLROOT; ?>/admin/orders?page=<?php echo $data['current_page'] + 1; ?>">Next</a>
-                        </li>
-                    </ul>
-                </nav>
-            <?php endif; ?>
+        <div class="col-md-3 text-end">
+            <a href="<?php echo URLROOT; ?>/admin" class="btn btn-outline-dark shadow-sm">
+                <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+            </a>
         </div>
     </div>
+
+    <!-- Results Container -->
+    <div id="order-results">
+        <?php require APP_ROOT . '/views/admin/orders_partial.php'; ?>
+    </div>
+
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.querySelector('input[name="search"]');
+        const dateInput = document.querySelector('input[name="date"]');
+        const resultsContainer = document.getElementById('order-results');
+        const filterForm = document.querySelector('form[action="<?php echo URLROOT; ?>/admin/orders"]');
+
+        let debounceTimer;
+
+        function fetchResults(url) {
+            const headers = new Headers();
+            headers.append('X-Requested-With', 'XMLHttpRequest');
+
+            resultsContainer.style.opacity = '0.5';
+
+            fetch(url, { headers: headers })
+                .then(response => response.text())
+                .then(html => {
+                    resultsContainer.innerHTML = html;
+                    resultsContainer.style.opacity = '1';
+                    window.history.pushState({ path: url }, '', url);
+                    attachPaginationListeners();
+                })
+                .catch(error => {
+                    console.error('Error fetching orders:', error);
+                    resultsContainer.style.opacity = '1';
+                });
+        }
+
+        function buildUrl() {
+            const search = searchInput.value;
+            const date = dateInput.value;
+
+            let url = '<?php echo URLROOT; ?>/admin/orders?';
+            const params = [];
+
+            if (search) params.push('search=' + encodeURIComponent(search));
+            if (date) params.push('date=' + encodeURIComponent(date));
+
+            return url + params.join('&');
+        }
+
+        function handleInput() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                fetchResults(buildUrl());
+            }, 300);
+        }
+
+        function handleDate() {
+            fetchResults(buildUrl());
+        }
+
+        function attachPaginationListeners() {
+            const paginationLinks = resultsContainer.querySelectorAll('.pagination a.page-link');
+            paginationLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    fetchResults(this.href);
+                });
+            });
+        }
+
+        if (searchInput) searchInput.addEventListener('input', handleInput);
+        if (dateInput) dateInput.addEventListener('change', handleDate);
+
+        if (filterForm) {
+            filterForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                fetchResults(buildUrl());
+            });
+        }
+
+        attachPaginationListeners();
+    });
+</script>
 
 <?php require APP_ROOT . '/views/inc/footer.php'; ?>

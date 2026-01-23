@@ -11,7 +11,35 @@
 <div class="container">
     <div class="row mb-4">
         <div class="col-md-6">
-            <!-- Search or Filter could go here -->
+            <form action="<?php echo URLROOT; ?>/movies" method="get" class="d-flex align-items-center flex-wrap gap-2">
+                <input type="text" name="search" class="form-control" placeholder="Search title..."
+                    value="<?php echo isset($data['filters']['search']) ? $data['filters']['search'] : ''; ?>"
+                    style="max-width: 200px;">
+
+                <select name="genre" class="form-select" style="max-width: 150px;">
+                    <option value="">All Genres</option>
+                    <?php if (isset($data['genres'])):
+                        foreach ($data['genres'] as $g): ?>
+                            <option value="<?php echo $g->genre; ?>" <?php echo isset($data['filters']['genre']) && $data['filters']['genre'] == $g->genre ? 'selected' : ''; ?>>
+                                <?php echo $g->genre; ?>
+                            </option>
+                        <?php endforeach; endif; ?>
+                </select>
+
+                <select name="status" class="form-select" style="max-width: 150px;">
+                    <option value="">All Status</option>
+                    <option value="showing" <?php echo isset($data['filters']['status']) && $data['filters']['status'] == 'showing' ? 'selected' : ''; ?>>Now Showing</option>
+                    <option value="coming_soon" <?php echo isset($data['filters']['status']) && $data['filters']['status'] == 'coming_soon' ? 'selected' : ''; ?>>Coming Soon</option>
+                    <option value="stopped" <?php echo isset($data['filters']['status']) && $data['filters']['status'] == 'stopped' ? 'selected' : ''; ?>>Stopped</option>
+                </select>
+
+                <button type="submit" class="btn btn-outline-primary"><i class="fas fa-filter"></i></button>
+
+                <?php if (!empty($data['filters']['search']) || !empty($data['filters']['genre']) || !empty($data['filters']['status'])): ?>
+                    <a href="<?php echo URLROOT; ?>/movies" class="btn btn-outline-secondary" title="Clear Filters"><i
+                            class="fas fa-times"></i></a>
+                <?php endif; ?>
+            </form>
         </div>
         <div class="col-md-6 text-end">
             <a href="<?php echo URLROOT; ?>/movies/add" class="btn btn-primary shadow-sm">
@@ -20,113 +48,9 @@
         </div>
     </div>
 
-    <?php flash('movie_message'); ?>
-
-    <div class="card border-0 shadow-lg overflow-hidden">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="bg-light">
-                        <tr>
-                            <th class="ps-4">Title</th>
-                            <th>Genre</th>
-                            <th>Duration</th>
-                            <th>Release Date</th>
-                            <th class="text-end pe-4">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($data['movies'] as $movie): ?>
-                            <tr>
-                                <td class="ps-4 fw-bold">
-                                    <?php echo $movie->title; ?>
-                                </td>
-                                <td>
-                                    <span class="badge bg-light text-dark border"><?php echo $movie->genre; ?></span>
-                                </td>
-                                <td>
-                                    <i class="far fa-clock text-muted me-1"></i> <?php echo $movie->duration; ?>m
-                                </td>
-                                <td>
-                                    <?php echo date('d M Y', strtotime($movie->release_date)); ?>
-                                </td>
-                                <td class="text-end pe-4">
-                                    <a href="<?php echo URLROOT; ?>/showtimes/add/<?php echo $movie->id; ?>"
-                                        class="btn btn-sm btn-outline-success me-1" title="Add Showtime">
-                                        <i class="fas fa-calendar-plus"></i>
-                                    </a>
-                                    <a href="<?php echo URLROOT; ?>/movies/edit/<?php echo $movie->id; ?>"
-                                        class="btn btn-sm btn-outline-warning me-1" title="Edit">
-                                        <i class="fas fa-pencil-alt"></i>
-                                    </a>
-                                    <form id="delete-form-<?php echo $movie->id; ?>"
-                                        action="<?php echo URLROOT; ?>/movies/delete/<?php echo $movie->id; ?>"
-                                        method="post" class="d-inline">
-                                        <button type="button" class="btn btn-sm btn-outline-danger" title="Delete"
-                                            data-bs-toggle="modal" data-bs-target="#deleteModal"
-                                            onclick="setDeleteForm('delete-form-<?php echo $movie->id; ?>')">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                        <?php if (empty($data['movies'])): ?>
-                            <tr>
-                                <td colspan="5" class="text-center py-5 text-muted">No movies found.</td>
-                            </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+    <div id="movie-results">
+        <?php require APP_ROOT . '/views/movies/list_partial.php'; ?>
     </div>
-
-    <!-- Pagination -->
-    <?php if (isset($data['total_pages']) && $data['total_pages'] > 1): ?>
-        <nav class="mt-4">
-            <ul class="pagination justify-content-center">
-                <li class="page-item <?php echo $data['current_page'] <= 1 ? 'disabled' : ''; ?>">
-                    <a class="page-link shadow-sm border-0 mx-1 rounded-circle d-flex align-items-center justify-content-center"
-                        style="width: 40px; height: 40px;"
-                        href="<?php echo URLROOT; ?>/movies?page=<?php echo $data['current_page'] - 1; ?>"
-                        aria-label="Previous">
-                        <i class="fas fa-chevron-left"></i>
-                    </a>
-                </li>
-
-                <?php
-                $range = 1; // Number of pages around current page
-                for ($i = 1; $i <= $data['total_pages']; $i++):
-                    if ($i == 1 || $i == $data['total_pages'] || ($i >= $data['current_page'] - $range && $i <= $data['current_page'] + $range)):
-                        ?>
-                        <li class="page-item <?php echo $data['current_page'] == $i ? 'active' : ''; ?>">
-                            <a class="page-link shadow-sm border-0 mx-1 rounded-circle d-flex align-items-center justify-content-center"
-                                style="width: 40px; height: 40px;"
-                                href="<?php echo URLROOT; ?>/movies?page=<?php echo $i; ?>"><?php echo $i; ?></a>
-                        </li>
-                    <?php elseif ($i == $data['current_page'] - $range - 1 || $i == $data['current_page'] + $range + 1): ?>
-                        <li class="page-item disabled">
-                            <span class="page-link border-0 shadow-none mx-1 d-flex align-items-center justify-content-center"
-                                style="width: 40px; height: 40px;">...</span>
-                        </li>
-                    <?php endif; endfor; ?>
-
-                <li class="page-item <?php echo $data['current_page'] >= $data['total_pages'] ? 'disabled' : ''; ?>">
-                    <a class="page-link shadow-sm border-0 mx-1 rounded-circle d-flex align-items-center justify-content-center"
-                        style="width: 40px; height: 40px;"
-                        href="<?php echo URLROOT; ?>/movies?page=<?php echo $data['current_page'] + 1; ?>"
-                        aria-label="Next">
-                        <i class="fas fa-chevron-right"></i>
-                    </a>
-                </li>
-            </ul>
-        </nav>
-        <div class="text-center text-muted small mt-2">
-            Showing page <?php echo $data['current_page']; ?> of <?php echo $data['total_pages']; ?> (Total
-            <?php echo $data['total_movies']; ?> movies)
-        </div>
-    <?php endif; ?>
 </div>
 
 <!-- Delete Confirmation Modal -->
@@ -162,6 +86,85 @@
         if (targetFormId) {
             document.getElementById(targetFormId).submit();
         }
+    });
+
+    // Real-time Search & Filtering
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.querySelector('input[name="search"]');
+        const genreSelect = document.querySelector('select[name="genre"]');
+        const statusSelect = document.querySelector('select[name="status"]');
+        const resultsContainer = document.getElementById('movie-results');
+        const filterForm = document.querySelector('form[action="<?php echo URLROOT; ?>/movies"]');
+        const clearBtn = document.querySelector('a[title="Clear Filters"]');
+
+        let debounceTimer;
+
+        function fetchResults(url) {
+            // Add AJAX header
+            const headers = new Headers();
+            headers.append('X-Requested-With', 'XMLHttpRequest');
+
+            fetch(url, { headers: headers })
+                .then(response => response.text())
+                .then(html => {
+                    resultsContainer.innerHTML = html;
+                    // Update URL in browser without reload
+                    window.history.pushState({ path: url }, '', url);
+
+                    // Re-attach pagination listeners since DOM updated
+                    attachPaginationListeners();
+                })
+                .catch(error => console.error('Error fetching movies:', error));
+        }
+
+        function buildUrl() {
+            const search = searchInput.value;
+            const genre = genreSelect.value;
+            const status = statusSelect.value;
+            let url = '<?php echo URLROOT; ?>/movies?';
+            const params = [];
+
+            if (search) params.push('search=' + encodeURIComponent(search));
+            if (genre) params.push('genre=' + encodeURIComponent(genre));
+            if (status) params.push('status=' + encodeURIComponent(status));
+
+            return url + params.join('&');
+        }
+
+        function handleInput() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                fetchResults(buildUrl());
+            }, 300); // 300ms debounce
+        }
+
+        function handleSelect() {
+            fetchResults(buildUrl());
+        }
+
+        function attachPaginationListeners() {
+            const paginationLinks = resultsContainer.querySelectorAll('.pagination a.page-link');
+            paginationLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    fetchResults(this.href);
+                });
+            });
+        }
+
+        // Attach Event Listeners
+        searchInput.addEventListener('input', handleInput);
+        genreSelect.addEventListener('change', handleSelect);
+        statusSelect.addEventListener('change', handleSelect);
+
+        // Prevent default form submission and use AJAX
+        filterForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            fetchResults(buildUrl());
+        });
+
+        // Initial listeners
+        attachPaginationListeners();
     });
 </script>
 

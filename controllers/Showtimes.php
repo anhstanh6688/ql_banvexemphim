@@ -19,25 +19,45 @@ class Showtimes extends Controller
 
     public function index()
     {
-        // Admin view to list all showtimes
+        // Pagination vars
         $limit = 10;
         $page = isset($_GET['page']) && is_numeric($_GET['page']) ? (int) $_GET['page'] : 1;
         if ($page < 1)
             $page = 1;
 
-        $total_showtimes = $this->showtimeModel->getAllShowtimeCount();
+        // Filters
+        $filters = [
+            'search' => isset($_GET['search']) ? trim($_GET['search']) : '',
+            'room_id' => isset($_GET['room_id']) ? trim($_GET['room_id']) : '',
+            'date' => isset($_GET['date']) ? trim($_GET['date']) : ''
+        ];
+
+        // Fetch Rooms for dropdown
+        $rooms = $this->roomModel->getRooms();
+
+        // Get Filtered Counts
+        $total_showtimes = $this->showtimeModel->getFilteredShowtimesCount($filters);
         $total_pages = ceil($total_showtimes / $limit);
         $offset = ($page - 1) * $limit;
 
-        $showtimes = $this->showtimeModel->getAllShowtimesPaginated($limit, $offset);
+        // Get Showtimes
+        $showtimes = $this->showtimeModel->getFilteredShowtimesPaginated($filters, $limit, $offset);
 
         $data = [
             'showtimes' => $showtimes,
             'current_page' => $page,
             'total_pages' => $total_pages,
-            'total_showtimes' => $total_showtimes
+            'total_showtimes' => $total_showtimes,
+            'filters' => $filters,
+            'rooms' => $rooms
         ];
-        $this->view('showtimes/index', $data);
+
+        // Check for AJAX request
+        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+            $this->view('showtimes/list_partial', $data);
+        } else {
+            $this->view('showtimes/index', $data);
+        }
     }
 
     public function add($movieId = null)

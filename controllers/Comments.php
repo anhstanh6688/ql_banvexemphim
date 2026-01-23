@@ -112,7 +112,7 @@ class Comments extends Controller
 
             error_log("Comment Found. Owner ID: " . $comment->user_id);
 
-            error_log("Comment Found. Owner ID: " . $comment->user_id);
+
 
             // Check permissions (Owner OR Admin)
             $isAdmin = isset($_SESSION['user_role']) && $_SESSION['user_role'] == 'admin';

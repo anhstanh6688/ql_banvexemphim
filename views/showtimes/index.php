@@ -12,9 +12,36 @@
 
 <div class="container">
     <div class="row mb-4">
-        <div class="col-md-6">
+        <div class="col-md-9">
+            <form action="<?php echo URLROOT; ?>/showtimes" method="get"
+                class="d-flex align-items-center flex-wrap gap-2">
+                <input type="text" name="search" class="form-control" placeholder="Search movie..."
+                    value="<?php echo isset($data['filters']['search']) ? $data['filters']['search'] : ''; ?>"
+                    style="max-width: 200px;">
+
+                <select name="room_id" class="form-select" style="max-width: 150px;">
+                    <option value="">All Rooms</option>
+                    <?php if (isset($data['rooms'])):
+                        foreach ($data['rooms'] as $r): ?>
+                            <option value="<?php echo $r->id; ?>" <?php echo isset($data['filters']['room_id']) && $data['filters']['room_id'] == $r->id ? 'selected' : ''; ?>>
+                                <?php echo $r->name; ?>
+                            </option>
+                        <?php endforeach; endif; ?>
+                </select>
+
+                <input type="date" name="date" class="form-control"
+                    value="<?php echo isset($data['filters']['date']) ? $data['filters']['date'] : ''; ?>"
+                    style="max-width: 150px;">
+
+                <button type="submit" class="btn btn-outline-primary"><i class="fas fa-filter"></i></button>
+
+                <?php if (!empty($data['filters']['search']) || !empty($data['filters']['room_id']) || !empty($data['filters']['date'])): ?>
+                    <a href="<?php echo URLROOT; ?>/showtimes" class="btn btn-outline-secondary" title="Clear Filters"><i
+                            class="fas fa-times"></i></a>
+                <?php endif; ?>
+            </form>
         </div>
-        <div class="col-md-6 text-end">
+        <div class="col-md-3 text-end">
             <a href="<?php echo URLROOT; ?>/showtimes/add" class="btn btn-success shadow-sm">
                 <i class="fas fa-clock me-1"></i> Add New Showtime
             </a>
@@ -23,109 +50,8 @@
 
     <?php flash('showtime_message'); ?>
 
-    <div class="card border-0 shadow-lg overflow-hidden">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="bg-light">
-                        <tr>
-                            <th class="ps-4">Movie</th>
-                            <th>Room</th>
-                            <th>Start Time</th>
-                            <th>Price</th>
-                            <th class="text-end pe-4">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($data['showtimes'] as $show): ?>
-                            <tr>
-                                <td class="ps-4 fw-bold text-primary"><?php echo $show->title; ?></td>
-                                <td>
-                                    <i class="fas fa-map-marker-alt text-muted me-1"></i> <?php echo $show->room_name; ?>
-                                </td>
-                                <td>
-                                    <span class="badge bg-light text-dark border">
-                                        <?php echo date('d M Y', strtotime($show->start_time)); ?>
-                                    </span>
-                                    <span class="fw-bold ms-1 text-dark">
-                                        <?php echo date('H:i', strtotime($show->start_time)); ?>
-                                    </span>
-                                </td>
-                                <td class="fw-bold text-success">
-                                    <?php echo number_format($show->price); ?> đ
-                                </td>
-                                <td class="text-end pe-4">
-                                    <a href="<?php echo URLROOT; ?>/showtimes/edit/<?php echo $show->id; ?>"
-                                        class="btn btn-sm btn-outline-secondary me-1" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <form id="delete-form-<?php echo $show->id; ?>"
-                                        action="<?php echo URLROOT; ?>/showtimes/delete/<?php echo $show->id; ?>"
-                                        method="post" class="d-inline">
-                                        <button type="button" class="btn btn-sm btn-outline-danger" title="Delete"
-                                            data-bs-toggle="modal" data-bs-target="#deleteModal"
-                                            onclick="setDeleteForm('delete-form-<?php echo $show->id; ?>')">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                        <?php if (empty($data['showtimes'])): ?>
-                            <tr>
-                                <td colspan="5" class="text-center py-5 text-muted">No showtimes found.</td>
-                            </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Pagination -->
-        <?php if (isset($data['total_pages']) && $data['total_pages'] > 1): ?>
-            <nav class="mt-4">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item <?php echo $data['current_page'] <= 1 ? 'disabled' : ''; ?>">
-                        <a class="page-link shadow-sm border-0 mx-1 rounded-circle d-flex align-items-center justify-content-center"
-                            style="width: 40px; height: 40px;"
-                            href="<?php echo URLROOT; ?>/showtimes?page=<?php echo $data['current_page'] - 1; ?>"
-                            aria-label="Previous">
-                            <i class="fas fa-chevron-left"></i>
-                        </a>
-                    </li>
-
-                    <?php
-                    $range = 1; // Number of pages around current page
-                    for ($i = 1; $i <= $data['total_pages']; $i++):
-                        if ($i == 1 || $i == $data['total_pages'] || ($i >= $data['current_page'] - $range && $i <= $data['current_page'] + $range)):
-                            ?>
-                            <li class="page-item <?php echo $data['current_page'] == $i ? 'active' : ''; ?>">
-                                <a class="page-link shadow-sm border-0 mx-1 rounded-circle d-flex align-items-center justify-content-center"
-                                    style="width: 40px; height: 40px;"
-                                    href="<?php echo URLROOT; ?>/showtimes?page=<?php echo $i; ?>"><?php echo $i; ?></a>
-                            </li>
-                        <?php elseif ($i == $data['current_page'] - $range - 1 || $i == $data['current_page'] + $range + 1): ?>
-                            <li class="page-item disabled">
-                                <span class="page-link border-0 shadow-none mx-1 d-flex align-items-center justify-content-center"
-                                    style="width: 40px; height: 40px;">...</span>
-                            </li>
-                        <?php endif; endfor; ?>
-
-                    <li class="page-item <?php echo $data['current_page'] >= $data['total_pages'] ? 'disabled' : ''; ?>">
-                        <a class="page-link shadow-sm border-0 mx-1 rounded-circle d-flex align-items-center justify-content-center"
-                            style="width: 40px; height: 40px;"
-                            href="<?php echo URLROOT; ?>/showtimes?page=<?php echo $data['current_page'] + 1; ?>"
-                            aria-label="Next">
-                            <i class="fas fa-chevron-right"></i>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-            <div class="text-center text-muted small mt-2">
-                Showing page <?php echo $data['current_page']; ?> of <?php echo $data['total_pages']; ?> (Total
-                <?php echo $data['total_showtimes']; ?> showtimes)
-            </div>
-        <?php endif; ?>
+    <div id="showtime-results">
+        <?php require APP_ROOT . '/views/showtimes/list_partial.php'; ?>
     </div>
 </div>
 
@@ -162,6 +88,78 @@
         if (targetFormId) {
             document.getElementById(targetFormId).submit();
         }
+    });
+
+    // Real-time Search & Filtering
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.querySelector('input[name="search"]');
+        const roomSelect = document.querySelector('select[name="room_id"]');
+        const dateInput = document.querySelector('input[name="date"]');
+        const resultsContainer = document.getElementById('showtime-results');
+        const filterForm = document.querySelector('form[action="<?php echo URLROOT; ?>/showtimes"]');
+
+        let debounceTimer;
+
+        function fetchResults(url) {
+            const headers = new Headers();
+            headers.append('X-Requested-With', 'XMLHttpRequest');
+
+            fetch(url, { headers: headers })
+                .then(response => response.text())
+                .then(html => {
+                    resultsContainer.innerHTML = html;
+                    window.history.pushState({ path: url }, '', url);
+                    attachPaginationListeners();
+                })
+                .catch(error => console.error('Error fetching showtimes:', error));
+        }
+
+        function buildUrl() {
+            const search = searchInput.value;
+            const room_id = roomSelect.value;
+            const date = dateInput.value;
+
+            let url = '<?php echo URLROOT; ?>/showtimes?';
+            const params = [];
+
+            if (search) params.push('search=' + encodeURIComponent(search));
+            if (room_id) params.push('room_id=' + encodeURIComponent(room_id));
+            if (date) params.push('date=' + encodeURIComponent(date));
+
+            return url + params.join('&');
+        }
+
+        function handleInput() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                fetchResults(buildUrl());
+            }, 300);
+        }
+
+        function handleSelect() {
+            fetchResults(buildUrl());
+        }
+
+        function attachPaginationListeners() {
+            const paginationLinks = resultsContainer.querySelectorAll('.pagination a.page-link');
+            paginationLinks.forEach(link => {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    fetchResults(this.href);
+                });
+            });
+        }
+
+        searchInput.addEventListener('input', handleInput);
+        roomSelect.addEventListener('change', handleSelect);
+        dateInput.addEventListener('change', handleSelect);
+
+        filterForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            fetchResults(buildUrl());
+        });
+
+        attachPaginationListeners();
     });
 </script>
 
