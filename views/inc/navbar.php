@@ -1,7 +1,12 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm py-3">
     <div class="container">
-        <a class="navbar-brand fw-bold text-primary fs-4" href="<?php echo URLROOT; ?>">
-            <i class="fas fa-film me-2"></i><?php echo SITENAME; ?>
+        <a class="navbar-brand d-flex align-items-center gap-2" href="<?php echo URLROOT; ?>">
+            <img src="https://img.pikbest.com/origin/10/49/11/85tpIkbEsTcjq.png!sw800" alt="Logo" width="40" height="40"
+                class="d-inline-block align-text-top rounded-circle">
+            <span class="fw-bold"
+                style="font-family: 'Nunito', sans-serif; font-size: 1.5rem; color: #0f172a; letter-spacing: -0.5px;">
+                <?php echo SITENAME; ?>
+            </span>
         </a>
         <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
             <span class="navbar-toggler-icon"></span>

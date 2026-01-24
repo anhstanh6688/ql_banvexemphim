@@ -5,7 +5,14 @@
         <div class="row">
             <!-- Column 1: About + Contact -->
             <div class="col-lg-5 mb-5 mb-lg-0 pe-lg-5">
-                <h5 class="mb-4"><i class="fas fa-film text-primary me-2"></i><?php echo SITENAME; ?></h5>
+                <h5 class="mb-4 d-flex align-items-center gap-2">
+                    <img src="https://img.pikbest.com/origin/10/49/11/85tpIkbEsTcjq.png!sw800" alt="Logo" width="32"
+                        height="32" class="d-inline-block rounded-circle">
+                    <span class="fw-bold"
+                        style="font-family: 'Nunito', sans-serif; font-size: 1.25rem; color: #0f172a; letter-spacing: -0.5px;">
+                        <?php echo SITENAME; ?>
+                    </span>
+                </h5>
                 <p class="mb-4">
                     Your premium destination for the latest blockbusters and an unforgettable cinematic experience.
                 </p>
@@ -14,7 +21,7 @@
                         <div class="contact-icon">
                             <i class="fas fa-phone-alt"></i>
                         </div>
-                        <span class="fw-medium">+1 (555) 123-4567</span>
+                        <span class="fw-medium">0399501846</span>
                     </div>
                     <div class="contact-item">
                         <div class="contact-icon">
@@ -57,8 +64,8 @@
                         <i class="fas fa-map-marker-alt"></i>
                     </div>
                     <span>
-                        123 Cinema Paradise Blvd,<br>
-                        Los Angeles, CA 90028
+                        To dan pho Thu Doi,<br>
+                        Phuong Ninh Xa, Tinh Bac Ninh
                     </span>
                 </div>
             </div>

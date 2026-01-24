@@ -1,0 +1,8 @@
+Current PHP Time: 2026-01-24 06:52:43
+Current DB Time: 2026-01-24 06:52:43
+Showtimes for Movie 1:
+ID: 26 | Start: 2026-05-01 10:00:00
+ID: 34 | Start: 2026-01-24 00:30:00
+ID: 35 | Start: 2026-01-24 13:30:00
+ID: 36 | Start: 2026-01-24 14:30:00
+ID: 37 | Start: 2026-01-24 03:50:00
