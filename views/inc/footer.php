@@ -8,8 +8,8 @@
                 <h5 class="mb-4 d-flex align-items-center gap-2">
                     <img src="https://img.pikbest.com/origin/10/49/11/85tpIkbEsTcjq.png!sw800" alt="Logo" width="32"
                         height="32" class="d-inline-block rounded-circle">
-                    <span class="fw-bold"
-                        style="font-family: 'Nunito', sans-serif; font-size: 1.25rem; color: #0f172a; letter-spacing: -0.5px;">
+                    <span class="fw-bold text-main"
+                        style="font-family: 'Nunito', sans-serif; font-size: 1.25rem; letter-spacing: -0.5px;">
                         <?php echo SITENAME; ?>
                     </span>
                 </h5>

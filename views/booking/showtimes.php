@@ -179,6 +179,13 @@
                                             <div class="d-flex flex-nowrap gap-3 overflow-hidden showtime-track py-2"
                                                 id="showtime-track-<?php echo $date; ?>"
                                                 style="scroll-behavior: smooth; -webkit-overflow-scrolling: touch;">
+
+                                                <!-- Dynamic No Shows Message -->
+                                                <div class="no-shows-msg w-100 text-center py-5 d-none">
+                                                    <i class="fas fa-search-minus fa-2x text-muted mb-3 opacity-50"></i>
+                                                    <p class="text-muted fw-bold">No showtimes match your filter.</p>
+                                                </div>
+
                                                 <?php foreach ($shows as $show):
                                                     // Calculate Stats
                                                     $booked = isset($data['ticket_counts'][$show->id]) ? $data['ticket_counts'][$show->id] : 0;
@@ -365,20 +372,23 @@
 
 <script>
     // Delete Modal Logic
-    let targetFormId = null;
-    function setDeleteForm(formId) {
-        targetFormId = formId;
-    }
+    document.addEventListener('DOMContentLoaded', function () {
+        let targetFormId = null;
 
-    // Check if element exists before adding listener to avoid errors
-    const confirmBtn = document.getElementById('confirmDeleteBtn');
-    if (confirmBtn) {
-        confirmBtn.addEventListener('click', function () {
-            if (targetFormId) {
-                document.getElementById(targetFormId).submit();
-            }
-        });
-    }
+        // Make globally available for onclick
+        window.setDeleteForm = function (formId) {
+            targetFormId = formId;
+        };
+
+        const confirmBtn = document.getElementById('confirmDeleteBtn');
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', function () {
+                if (targetFormId) {
+                    document.getElementById(targetFormId).submit();
+                }
+            });
+        }
+    });
 
     // Filter Logic
     document.addEventListener('DOMContentLoaded', function () {
@@ -392,17 +402,39 @@
             const period = document.querySelector('input[name="timeFilter"]:checked').value;
             const onlyAvail = availSwitch.checked;
 
-            items.forEach(item => {
-                const itemRoom = item.dataset.room;
-                const itemPeriod = item.dataset.period;
-                const itemAvail = parseInt(item.dataset.available);
+            // Handle each day tab separately
+            const tabPanes = document.querySelectorAll('.tab-pane');
 
-                let show = true;
-                if (room !== 'all' && itemRoom !== room) show = false;
-                if (period !== 'all' && itemPeriod !== period) show = false;
-                if (onlyAvail && itemAvail <= 0) show = false;
+            tabPanes.forEach(pane => {
+                const items = pane.querySelectorAll('.showtime-item');
+                const noShowsMsg = pane.querySelector('.no-shows-msg');
 
-                item.style.display = show ? 'inline-block' : 'none';
+                if (!items.length) return;
+
+                let visibleCount = 0;
+
+                items.forEach(item => {
+                    const itemRoom = item.dataset.room;
+                    const itemPeriod = item.dataset.period;
+                    const itemAvail = parseInt(item.dataset.available);
+
+                    let show = true;
+                    if (room !== 'all' && itemRoom !== room) show = false;
+                    if (period !== 'all' && itemPeriod !== period) show = false;
+                    if (onlyAvail && itemAvail <= 0) show = false;
+
+                    item.style.display = show ? 'inline-block' : 'none';
+                    if (show) visibleCount++;
+                });
+
+                // Toggle No Shows Message
+                if (noShowsMsg) {
+                    if (visibleCount === 0) {
+                        noShowsMsg.classList.remove('d-none');
+                    } else {
+                        noShowsMsg.classList.add('d-none');
+                    }
+                }
             });
         }
 

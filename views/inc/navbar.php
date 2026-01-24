@@ -3,8 +3,8 @@
         <a class="navbar-brand d-flex align-items-center gap-2" href="<?php echo URLROOT; ?>">
             <img src="https://img.pikbest.com/origin/10/49/11/85tpIkbEsTcjq.png!sw800" alt="Logo" width="40" height="40"
                 class="d-inline-block align-text-top rounded-circle">
-            <span class="fw-bold"
-                style="font-family: 'Nunito', sans-serif; font-size: 1.5rem; color: #0f172a; letter-spacing: -0.5px;">
+            <span class="fw-bold text-main"
+                style="font-family: 'Nunito', sans-serif; font-size: 1.5rem; letter-spacing: -0.5px;">
                 <?php echo SITENAME; ?>
             </span>
         </a>
@@ -24,6 +24,13 @@
 
             <!-- Right Side -->
             <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item me-2">
+                    <button
+                        class="btn btn-sm btn-light rounded-circle shadow-sm border-0 d-flex align-items-center justify-content-center"
+                        id="themeToggle" style="width: 38px; height: 38px;" title="Switch Theme">
+                        <i class="fas fa-moon text-primary"></i>
+                    </button>
+                </li>
                 <?php if (isset($_SESSION['user_id'])): ?>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown"
@@ -115,3 +122,36 @@
         box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
     }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggleBtn = document.getElementById('themeToggle');
+        const icon = toggleBtn.querySelector('i');
+        const html = document.documentElement;
+
+        // Check Saved Theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            html.setAttribute('data-theme', 'dark');
+            icon.classList.remove('fa-moon', 'text-primary');
+            icon.classList.add('fa-sun', 'text-warning');
+            toggleBtn.classList.replace('btn-light', 'btn-dark');
+        }
+
+        toggleBtn.addEventListener('click', function () {
+            if (html.getAttribute('data-theme') === 'dark') {
+                html.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+                icon.classList.remove('fa-sun', 'text-warning');
+                icon.classList.add('fa-moon', 'text-primary');
+                toggleBtn.classList.replace('btn-dark', 'btn-light');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                icon.classList.remove('fa-moon', 'text-primary');
+                icon.classList.add('fa-sun', 'text-warning');
+                toggleBtn.classList.replace('btn-light', 'btn-dark');
+            }
+        });
+    });
+</script>

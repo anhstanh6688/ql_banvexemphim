@@ -50,6 +50,188 @@
     --radius-input: 12px;
 }
 
+[data-theme="dark"] {
+    --bg-color: #0f172a;
+    /* Slate 900 */
+    --card-bg: #1e293b;
+    /* Slate 800 */
+    --text-main: #f8fafc;
+    /* Slate 50 */
+    --text-muted: #94a3b8;
+    /* Slate 400 */
+    --border-color: #334155;
+    /* Slate 700 */
+    --primary-light: #172554;
+    /* Dark Blue */
+    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+}
+
+/* Dark Mode Overrides for Bootstrap Utilities */
+[data-theme="dark"] .text-dark {
+    color: #f8fafc !important;
+}
+
+[data-theme="dark"] .text-muted,
+[data-theme="dark"] .text-secondary {
+    color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .bg-white {
+    background-color: var(--card-bg) !important;
+}
+
+[data-theme="dark"] .feature-card {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .feature-title {
+    color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .feature-text {
+    color: var(--text-muted) !important;
+}
+
+[data-theme="dark"] .card {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] .bg-light {
+    background-color: #334155 !important;
+    /* Lighter Slate for contrast against Card Bg */
+    color: #f8fafc !important;
+}
+
+[data-theme="dark"] .table {
+    color: var(--text-main);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .table thead th {
+    background-color: #334155;
+    color: var(--text-main);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .table-hover tbody tr:hover {
+    background-color: #334155;
+}
+
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+    color: var(--text-main);
+}
+
+[data-theme="dark"] .form-control::placeholder {
+    color: #64748b;
+}
+
+[data-theme="dark"] .btn-light {
+    background-color: #334155;
+    border-color: #475569;
+    color: var(--text-main);
+}
+
+[data-theme="dark"] .btn-outline-dark {
+    color: #f8fafc;
+    border-color: #f8fafc;
+}
+
+[data-theme="dark"] .btn-outline-dark:hover {
+    background-color: #f8fafc;
+    color: #0f172a;
+}
+
+[data-theme="dark"] .nav-link {
+    color: #f1f5f9 !important;
+    /* Bright White-Gray */
+    background-color: transparent !important;
+    border: 1px solid transparent;
+    opacity: 0.7;
+}
+
+[data-theme="dark"] .nav-link:hover {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    opacity: 1;
+}
+
+[data-theme="dark"] .nav-link.active {
+    color: #ffffff !important;
+    background-color: var(--primary-color) !important;
+    opacity: 1;
+}
+
+/* Fix Alert Info Contrast - High Visibility */
+[data-theme="dark"] .alert-info {
+    background-color: #0c4a6e !important;
+    /* Dark Blue */
+    color: #e0f2fe !important;
+    /* Very Light Blue */
+    border-color: #0284c7 !important;
+}
+
+[data-theme="dark"] .alert-info i,
+[data-theme="dark"] .text-info {
+    color: #38bdf8 !important;
+    /* Sky Blue */
+}
+
+/* Fix for Button Group Filters (Morning/Afternoon) */
+[data-theme="dark"] .btn-outline-light {
+    background-color: transparent;
+    border-color: #475569;
+    color: #e2e8f0 !important;
+    /* Force light text */
+}
+
+[data-theme="dark"] .btn-outline-light:hover,
+[data-theme="dark"] .btn-check:checked+.btn-outline-light {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #ffffff !important;
+    /* Primary Blue bg with White text */
+}
+
+/* Fix for Showtime Item Hover in Dark Mode */
+[data-theme="dark"] .showtime-item:hover {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+[data-theme="dark"] .showtime-item:hover * {
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .showtime-item:hover .text-muted {
+    color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .showtime-item:hover .badge {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    color: #fff !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Specific fix for the "text-dark" class often used with these buttons */
+[data-theme="dark"] .btn-outline-light.text-dark {
+    color: #e2e8f0 !important;
+}
+
+/* Specific fix for the "text-dark" class often used with these buttons */
+[data-theme="dark"] .btn-outline-light.text-dark {
+    color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .border {
+    border-color: var(--border-color) !important;
+}
+
 @keyframes float {
     0% {
         transform: translateY(0px);
@@ -68,6 +250,11 @@
     animation: float 4s ease-in-out infinite;
 }
 
+/* Typography Utilities */
+.text-main {
+    color: var(--text-main) !important;
+}
+
 body {
     background-color: var(--bg-color);
     color: var(--text-main);
@@ -75,11 +262,12 @@ body {
     font-weight: 400;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Navbar */
 .navbar {
-    background-color: rgba(255, 255, 255, 0.95) !important;
+    background-color: var(--card-bg) !important;
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border-color);
     box-shadow: var(--shadow-xs);
