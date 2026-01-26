@@ -42,6 +42,11 @@ class Rooms extends Controller
             // Validation
             if (empty($data['name'])) {
                 $data['name_err'] = 'Please enter room name';
+            } else {
+                // Check if room name exists
+                if ($this->roomModel->findRoomByName($data['name'])) {
+                    $data['name_err'] = 'Room name already exists';
+                }
             }
             if (empty($data['total_rows'])) {
                 $data['rows_err'] = 'Please enter total rows';

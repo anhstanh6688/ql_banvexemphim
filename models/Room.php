@@ -23,6 +23,14 @@ class Room
         return $this->db->single();
     }
 
+    // Find room by name
+    public function findRoomByName($name)
+    {
+        $this->db->query('SELECT * FROM rooms WHERE name = :name');
+        $this->db->bind(':name', $name);
+        return $this->db->single();
+    }
+
     // Add new room
     public function add($data)
     {
