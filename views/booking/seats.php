@@ -49,12 +49,16 @@
                     style="display: grid; grid-template-columns: repeat(<?php echo $data['room']->total_cols; ?>, 1fr); gap: 10px;">
                     <?php foreach ($data['seats'] as $seat): ?>
                         <?php
+                        // Check both Booking Status (Ticket) AND Admin Status (Locked)
                         $isBooked = in_array($seat->id, $data['bookedSeats']);
+                        $isLocked = ($seat->status == 'locked');
+                        $isUnavailable = $isBooked || $isLocked;
+
                         // Use neutral 'secondary' for available, handled by CSS overrides
-                        $class = $isBooked ? 'btn-secondary disabled' : 'btn-outline-secondary shadow-none';
+                        $class = $isUnavailable ? 'btn-secondary disabled' : 'btn-outline-secondary shadow-none';
                         ?>
                         <div class="text-center">
-                            <?php if ($isBooked): ?>
+                            <?php if ($isUnavailable): ?>
                                 <button type="button" class="btn <?php echo $class; ?> btn-sm"
                                     style="width: 40px; height: 35px;" disabled></button>
                             <?php else: ?>

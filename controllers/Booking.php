@@ -195,6 +195,20 @@ class Booking extends Controller
             $db = Database::getInstance();
 
             try {
+                // BACKEND SECURITY CHECK: Ensure seats are not locked/broken
+                // This prevents users from bypassing UI to book disabled seats
+                // ... (Security check logic) ...
+                foreach ($selectedSeats as $seatId) {
+                    $db->query("SELECT status FROM seats WHERE id = :id");
+                    $db->bind(':id', $seatId);
+                    $s = $db->single();
+                    if ($s && $s->status != 'available') {
+                        flash('booking_msg', 'One or more selected seats are unavailable (Locked).', 'alert alert-danger');
+                        redirect('booking/seats/' . $showtimeId);
+                        return; // Stop execution
+                    }
+                }
+
                 $db->beginTransaction();
 
                 // 1. Create Order
