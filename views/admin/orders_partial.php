@@ -61,8 +61,10 @@
             <nav aria-label="Order navigation">
                 <ul class="pagination justify-content-center mb-0">
                     <li class="page-item <?php echo $data['current_page'] <= 1 ? 'disabled' : ''; ?>">
-                        <a class="page-link"
-                            href="<?php echo URLROOT; ?>/admin/orders?page=<?php echo $data['current_page'] - 1; ?>&search=<?php echo isset($data['filters']['search']) ? $data['filters']['search'] : ''; ?>&date=<?php echo isset($data['filters']['date']) ? $data['filters']['date'] : ''; ?>">Previous</a>
+                        <a class="page-link" aria-label="Previous"
+                            href="<?php echo URLROOT; ?>/admin/orders?page=<?php echo $data['current_page'] - 1; ?>&search=<?php echo isset($data['filters']['search']) ? $data['filters']['search'] : ''; ?>&date=<?php echo isset($data['filters']['date']) ? $data['filters']['date'] : ''; ?>">
+                            <span aria-hidden="true"><i class="fas fa-chevron-left"></i></span>
+                        </a>
                     </li>
 
                     <?php for ($i = 1; $i <= $data['total_pages']; $i++): ?>
@@ -75,8 +77,10 @@
                     <?php endfor; ?>
 
                     <li class="page-item <?php echo $data['current_page'] >= $data['total_pages'] ? 'disabled' : ''; ?>">
-                        <a class="page-link"
-                            href="<?php echo URLROOT; ?>/admin/orders?page=<?php echo $data['current_page'] + 1; ?>&search=<?php echo isset($data['filters']['search']) ? $data['filters']['search'] : ''; ?>&date=<?php echo isset($data['filters']['date']) ? $data['filters']['date'] : ''; ?>">Next</a>
+                        <a class="page-link" aria-label="Next"
+                            href="<?php echo URLROOT; ?>/admin/orders?page=<?php echo $data['current_page'] + 1; ?>&search=<?php echo isset($data['filters']['search']) ? $data['filters']['search'] : ''; ?>&date=<?php echo isset($data['filters']['date']) ? $data['filters']['date'] : ''; ?>">
+                            <span aria-hidden="true"><i class="fas fa-chevron-right"></i></span>
+                        </a>
                     </li>
                 </ul>
             </nav>

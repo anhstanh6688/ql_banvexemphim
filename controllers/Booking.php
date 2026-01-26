@@ -6,6 +6,7 @@ class Booking extends Controller
     private $roomModel;
     private $ticketModel;
     private $userModel;
+    private $commentModel;
 
     public function __construct()
     {
