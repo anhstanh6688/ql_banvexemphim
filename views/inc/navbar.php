@@ -56,6 +56,8 @@
                                             class="fas fa-video me-2 text-primary"></i> Manage Movies</a></li>
                                 <li><a class="dropdown-item py-2" href="<?php echo URLROOT; ?>/showtimes"><i
                                             class="far fa-clock me-2 text-primary"></i> Manage Showtimes</a></li>
+                                <li><a class="dropdown-item py-2" href="<?php echo URLROOT; ?>/rooms"><i
+                                            class="fas fa-th me-2 text-primary"></i> Manage Rooms</a></li>
                                 <li><a class="dropdown-item py-2" href="<?php echo URLROOT; ?>/admin/orders"><i
                                             class="fas fa-shopping-cart me-2 text-primary"></i> Manage Orders</a></li>
                                 <li>
