@@ -41,8 +41,11 @@ class Booking extends Controller
             $showtimeIds[] = $show->id;
         }
 
-        // Get Booked Seat Counts
-        $ticketCounts = $this->ticketModel->getTicketCountsByShowtimeIds($showtimeIds);
+        // Get Booked Seat Counts (Only counting tickets on Available seats to avoid double counting locked)
+        $ticketCounts = $this->ticketModel->getTicketCountsOnAvailableSeatsByShowtimeIds($showtimeIds);
+
+        // Get Locked Seat Counts (Unavailable Seats)
+        $lockedSeats = $this->roomModel->getLockedSeatCounts();
 
         // Extended Movie Info (Mock Data for Demo)
         $movieInfo = [
@@ -66,6 +69,7 @@ class Booking extends Controller
             'movie' => $movie,
             'grouped_showtimes' => $groupedShowtimes,
             'ticket_counts' => $ticketCounts,
+            'locked_seats' => $lockedSeats,
             'movie_info' => $movieInfo,
             'total_seats' => 60,
             'comments' => $comments,
@@ -222,7 +226,7 @@ class Booking extends Controller
                 // 2. Create Tickets
                 foreach ($selectedSeats as $seatId) {
                     $ticketCode = strtoupper(uniqid('TICKET-'));
-                    $db->query('INSERT INTO tickets (order_id, showtime_id, seat_id, ticket_code) VALUES (:oid, :sid, :seatid, :code)');
+                    $db->query('INSERT INTO tickets (order_id, showtime_id, seat_id, ticket_code, status) VALUES (:oid, :sid, :seatid, :code, "valid")');
                     $db->bind(':oid', $orderId);
                     $db->bind(':sid', $showtimeId);
                     $db->bind(':seatid', $seatId);

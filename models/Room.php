@@ -128,4 +128,15 @@ class Room
         $this->db->bind(':status', $status);
         return $this->db->execute();
     }
+
+    public function getLockedSeatCounts()
+    {
+        $this->db->query("SELECT room_id, COUNT(*) as count FROM seats WHERE status != 'available' GROUP BY room_id");
+        $results = $this->db->resultSet();
+        $counts = [];
+        foreach ($results as $row) {
+            $counts[$row->room_id] = $row->count;
+        }
+        return $counts;
+    }
 }

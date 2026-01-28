@@ -189,8 +189,11 @@
                                                 <?php foreach ($shows as $show):
                                                     // Calculate Stats
                                                     $booked = isset($data['ticket_counts'][$show->id]) ? $data['ticket_counts'][$show->id] : 0;
-                                                    $total = $data['total_seats'];
-                                                    $available = $total - $booked;
+                                                    // Dynamic Total Seats from Room Size
+                                                    $total = $show->total_rows * $show->total_cols;
+                                                    // Locked Seats
+                                                    $locked = isset($data['locked_seats'][$show->room_id]) ? $data['locked_seats'][$show->room_id] : 0;
+                                                    $available = max(0, $total - $booked - $locked);
                                                     $percent = ($booked / $total) * 100;
 
                                                     // Time Period

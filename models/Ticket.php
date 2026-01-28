@@ -81,20 +81,41 @@ class Ticket
                 AND status = 'valid'
                 GROUP BY showtime_id";
 
-        // We need to use raw PDO for array execution if Database wrapper doesn't support it directly in query()
-        // Standard Database.php usually prepares then binds. 
-        // Let's assume we can execute a query string with placeholders if we manipulate it manually or use a loop.
-        // Actually, let's use the DB query method if it supports array? 
-        // Based on previous files, Database::query prepares.
-
         $this->db->query($sql);
-        // We need to bind values 1, 2, 3...
         foreach ($showtimeIds as $k => $id) {
             $this->db->bind($k + 1, $id);
         }
 
         $results = $this->db->resultSet();
+        $counts = [];
+        foreach ($results as $row) {
+            $counts[$row->showtime_id] = $row->count;
+        }
+        return $counts;
+    }
 
+    // New Method: Count tickets ONLY on Available Seats
+    public function getTicketCountsOnAvailableSeatsByShowtimeIds($showtimeIds)
+    {
+        if (empty($showtimeIds))
+            return [];
+
+        $placeholders = implode(',', array_fill(0, count($showtimeIds), '?'));
+
+        $sql = "SELECT t.showtime_id, COUNT(*) as count 
+                FROM tickets t
+                JOIN seats s ON t.seat_id = s.id
+                WHERE t.showtime_id IN ($placeholders) 
+                AND t.status = 'valid'
+                AND s.status = 'available'
+                GROUP BY t.showtime_id";
+
+        $this->db->query($sql);
+        foreach ($showtimeIds as $k => $id) {
+            $this->db->bind($k + 1, $id);
+        }
+
+        $results = $this->db->resultSet();
         $counts = [];
         foreach ($results as $row) {
             $counts[$row->showtime_id] = $row->count;

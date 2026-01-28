@@ -296,7 +296,7 @@ class Showtime
     // Get active showtimes for a specific movie
     public function getShowtimesByMovieId($movieId)
     {
-        $this->db->query('SELECT s.*, r.name as room_name 
+        $this->db->query('SELECT s.*, r.name as room_name, r.total_rows, r.total_cols
                           FROM showtimes s
                           JOIN rooms r ON s.room_id = r.id
                           WHERE s.movie_id = :movie_id 
