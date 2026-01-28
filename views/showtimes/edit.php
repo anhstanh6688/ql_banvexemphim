@@ -69,8 +69,7 @@
                     </div>
 
                     <div class="d-grid">
-                        <button type="submit"
-                            class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm custom-hover">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold custom-hover">
                             <i class="fas fa-save me-2"></i> Update Showtime
                         </button>
                     </div>

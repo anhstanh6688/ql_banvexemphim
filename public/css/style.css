@@ -305,8 +305,9 @@ body {
 .nav-pills .nav-link.active,
 .nav-pills .show>.nav-link {
     background-color: var(--primary-color) !important;
+    background-image: none !important;
     color: #ffffff !important;
-    box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.4);
+    box-shadow: none !important;
 }
 
 /* Page Headers */
@@ -402,26 +403,31 @@ body {
 }
 
 .btn-primary {
-    background: var(--primary-gradient);
+    background-color: var(--primary-color);
+    background-image: none !important;
     color: #ffffff;
-    box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.3);
+    box-shadow: none !important;
 }
 
 .btn-primary:hover,
 .btn-primary:focus {
-    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
-    box-shadow: 0 8px 12px -3px rgba(99, 102, 241, 0.4);
+    background-color: var(--primary-hover);
+    background-image: none !important;
+    box-shadow: none !important;
     transform: translateY(-1px);
 }
 
 .btn-success {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background-color: #10b981;
+    background-image: none !important;
     color: white;
-    box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
+    box-shadow: none !important;
 }
 
 .btn-success:hover {
-    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    background-color: #059669;
+    background-image: none !important;
+    box-shadow: none !important;
     transform: translateY(-1px);
 }
 
@@ -455,6 +461,8 @@ body {
     font-size: 0.85rem;
 }
 
+
+
 /* Forms */
 .form-control,
 .form-select {
@@ -469,8 +477,11 @@ body {
 
 .form-control:focus,
 .form-select:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    border-color: #cbd5e1;
+    /* Light gray border instead of strong primary */
+    box-shadow: none !important;
+    /* Remove shadow as requested */
+    outline: none;
 }
 
 .form-floating>label {
@@ -701,16 +712,19 @@ body {
 }
 
 .btn-landing-primary {
-    background: var(--secondary-color);
-    background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+    background-color: var(--secondary-color);
+    background-image: none !important;
     border: none;
     color: white;
+    box-shadow: none !important;
 }
 
 .btn-landing-primary:hover {
-    background: linear-gradient(135deg, #db2777 0%, #be185d 100%);
+    background-color: var(--secondary-hover);
+    background-image: none !important;
     color: white;
     transform: translateY(-4px);
+    box-shadow: none !important;
 }
 
 .btn-landing-outline {
@@ -955,6 +969,7 @@ footer .contact-icon {
     font-weight: 800;
     margin-bottom: 1rem;
     background: linear-gradient(to right, #ffffff, #94a3b8);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }

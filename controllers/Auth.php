@@ -184,7 +184,16 @@ class Auth extends Controller
         $_SESSION['user_email'] = $user->email;
         $_SESSION['user_name'] = $user->fullname;
         $_SESSION['user_role'] = $user->role;
-        redirect('pages/index');
+        $_SESSION['user_role'] = $user->role;
+
+        if (isset($_SESSION['url_redirect'])) {
+            $url = $_SESSION['url_redirect'];
+            unset($_SESSION['url_redirect']);
+            header('Location: ' . $url);
+            exit;
+        } else {
+            redirect('pages/index');
+        }
     }
 
     public function logout()

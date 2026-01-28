@@ -71,8 +71,7 @@
                         </div>
 
                         <div class="d-grid gap-2">
-                            <input type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm"
-                                value="Create Movie">
+                            <input type="submit" class="btn btn-primary btn-lg rounded-pill" value="Create Movie">
                         </div>
                     </form>
                 </div>

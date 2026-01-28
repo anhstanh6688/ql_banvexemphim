@@ -11,6 +11,7 @@ class Booking extends Controller
     public function __construct()
     {
         if (!isLoggedIn()) {
+            $_SESSION['url_redirect'] = $_SERVER['REQUEST_URI'];
             redirect('auth/login');
         }
         $this->showtimeModel = $this->model('Showtime');

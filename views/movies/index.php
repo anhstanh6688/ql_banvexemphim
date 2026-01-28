@@ -42,7 +42,7 @@
             </form>
         </div>
         <div class="col-md-6 text-end">
-            <a href="<?php echo URLROOT; ?>/movies/add" class="btn btn-primary shadow-sm">
+            <a href="<?php echo URLROOT; ?>/movies/add" class="btn btn-primary">
                 <i class="fas fa-plus-circle me-1"></i> Add New Movie
             </a>
         </div>
