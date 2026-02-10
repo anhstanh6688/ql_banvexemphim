@@ -98,3 +98,29 @@ CREATE TABLE IF NOT EXISTS comments (
     INDEX (movie_id, created_at),
     INDEX (user_id, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- 9. Coupons Table
+CREATE TABLE IF NOT EXISTS coupons (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    code VARCHAR(50) NOT NULL UNIQUE,
+    discount_type ENUM('percent', 'fixed') NOT NULL,
+    discount_value DECIMAL(10, 2) NOT NULL,
+    status ENUM('active', 'expired') DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- Insert sample coupons
+INSERT IGNORE INTO coupons (code, discount_type, discount_value, status) VALUES
+('SALE100', 'percent', 100.00, 'active'),
+('CHAO2026', 'fixed', 50000.00, 'active');
+
+-- Update Orders Table to support Coupons and VietQR
+-- Check if columns exist before adding (using a dummy procedure or just ignoring error in manual run)
+-- Since this is a setup file, we write ALTER statements.
+-- If running on existing DB, these might fail if columns exist, but that's acceptable for this file.
+
+ALTER TABLE orders ADD COLUMN coupon_code VARCHAR(50) NULL AFTER showtime_id;
+ALTER TABLE orders ADD COLUMN original_amount DECIMAL(10, 2) NOT NULL DEFAULT 0 AFTER total_amount;
+ALTER TABLE orders ADD COLUMN final_amount DECIMAL(10, 2) NOT NULL DEFAULT 0 AFTER original_amount;
+ALTER TABLE orders MODIFY COLUMN payment_method ENUM('online_mock', 'vietqr', 'free') DEFAULT 'online_mock';

@@ -77,4 +77,27 @@ class User
             return false;
         }
     }
+
+
+    // Get User by Email (Returns Object)
+    public function getUserByEmail($email)
+    {
+        $this->db->query('SELECT * FROM users WHERE email = :email');
+        $this->db->bind(':email', $email);
+        return $this->db->single();
+    }
+
+    // Register Google User
+    public function registerGoogleUser($data)
+    {
+        $this->db->query('INSERT INTO users (fullname, email, phone, password, role) VALUES(:name, :email, :phone, :password, :role)');
+        // Bind values
+        $this->db->bind(':name', $data['fullname']);
+        $this->db->bind(':email', $data['email']);
+        $this->db->bind(':phone', ''); // Google users might not have phone initially
+        $this->db->bind(':password', $data['password']); // Hashed random password
+        $this->db->bind(':role', 'user');
+
+        return $this->db->execute();
+    }
 }

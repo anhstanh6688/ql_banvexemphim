@@ -178,7 +178,7 @@ class Auth extends Controller
         }
     }
 
-    public function createUserSession($user)
+    public function createUserSession($user, $redirect = true)
     {
         $_SESSION['user_id'] = $user->id;
         $_SESSION['user_email'] = $user->email;
@@ -186,13 +186,15 @@ class Auth extends Controller
         $_SESSION['user_role'] = $user->role;
         $_SESSION['user_role'] = $user->role;
 
-        if (isset($_SESSION['url_redirect'])) {
-            $url = $_SESSION['url_redirect'];
-            unset($_SESSION['url_redirect']);
-            header('Location: ' . $url);
-            exit;
-        } else {
-            redirect('pages/index');
+        if ($redirect) {
+            if (isset($_SESSION['url_redirect'])) {
+                $url = $_SESSION['url_redirect'];
+                unset($_SESSION['url_redirect']);
+                header('Location: ' . $url);
+                exit;
+            } else {
+                redirect('pages/index');
+            }
         }
     }
 
@@ -204,5 +206,77 @@ class Auth extends Controller
         unset($_SESSION['user_role']);
         session_destroy();
         redirect('auth/login');
+    }
+
+    public function google_login()
+    {
+        header('Content-Type: application/json');
+
+        try {
+            // Get JSON input
+            $json = file_get_contents('php://input');
+            $data = json_decode($json, true);
+
+            if (!isset($data['credential'])) {
+                echo json_encode(['success' => false, 'message' => 'No credential provided']);
+                return;
+            }
+
+            $id_token = $data['credential'];
+
+            // Verify ID Token with Google API
+            $url = "https://oauth2.googleapis.com/tokeninfo?id_token=" . $id_token;
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            // Fix for local development SSL certificate issues
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+            $response = curl_exec($ch);
+
+            if ($response === false) {
+                throw new Exception('Curl error: ' . curl_error($ch));
+            }
+            curl_close($ch);
+
+            $payload = json_decode($response, true);
+
+            if (!$payload || isset($payload['error_description'])) {
+                echo json_encode(['success' => false, 'message' => 'Invalid Token: ' . ($payload['error_description'] ?? 'Unknown error')]);
+                return;
+            }
+
+            // Token is valid
+            $email = $payload['email'];
+            $name = $payload['name'];
+
+            // Check if user exists
+            $user = $this->userModel->getUserByEmail($email);
+
+            if ($user) {
+                // User exists, log them in
+                $this->createUserSession($user, false);
+                echo json_encode(['success' => true, 'redirect' => URLROOT . '/pages/index']);
+            } else {
+                // Register new user
+                $password = bin2hex(random_bytes(8)); // Random password
+                $newUser = [
+                    'fullname' => $name,
+                    'email' => $email,
+                    'password' => password_hash($password, PASSWORD_DEFAULT)
+                ];
+
+                if ($this->userModel->registerGoogleUser($newUser)) {
+                    // Get the new user to log them in
+                    $user = $this->userModel->getUserByEmail($email);
+                    $this->createUserSession($user, false);
+                    echo json_encode(['success' => true, 'redirect' => URLROOT . '/pages/index']);
+                } else {
+                    echo json_encode(['success' => false, 'message' => 'Registration failed']);
+                }
+            }
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => 'Server Error: ' . $e->getMessage()]);
+        }
     }
 }

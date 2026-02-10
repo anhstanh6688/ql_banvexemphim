@@ -60,10 +60,19 @@ class Ticket
     }
 
     // Cancel Ticket
-    public function cancel($id)
+    public function cancel($id, $reason = null)
     {
-        $this->db->query('UPDATE tickets SET status = "cancelled" WHERE id = :id');
+        $sql = 'UPDATE tickets SET status = "cancelled"';
+        if ($reason) {
+            $sql .= ', cancellation_reason = :reason';
+        }
+        $sql .= ' WHERE id = :id';
+
+        $this->db->query($sql);
         $this->db->bind(':id', $id);
+        if ($reason) {
+            $this->db->bind(':reason', $reason);
+        }
         return $this->db->execute();
     }
 

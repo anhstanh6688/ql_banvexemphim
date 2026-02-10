@@ -77,4 +77,32 @@ class Admin extends Controller
 
         $this->view('admin/dashboard', $data);
     }
+
+    public function cancel_ticket()
+    {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            // Sanitize POST content
+            $_POST = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+
+            $ticketId = $_POST['ticket_id'];
+            $reason = trim($_POST['reason']);
+            $orderId = $_POST['order_id']; // For redirecting back
+
+            // Basic Validation
+            if (empty($reason)) {
+                flash('admin_msg', 'Cancellation reason is required', 'alert alert-danger');
+                redirect('users/order_details/' . $orderId);
+            }
+
+            // Execute Cancellation
+            if ($this->model('Ticket')->cancel($ticketId, $reason)) {
+                flash('admin_msg', 'Ticket cancelled successfully');
+            } else {
+                flash('admin_msg', 'Something went wrong', 'alert alert-danger');
+            }
+            redirect('users/order_details/' . $orderId);
+        } else {
+            redirect('admin/orders');
+        }
+    }
 }

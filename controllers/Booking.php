@@ -11,7 +11,6 @@ class Booking extends Controller
     public function __construct()
     {
         if (!isLoggedIn()) {
-            $_SESSION['url_redirect'] = $_SERVER['REQUEST_URI'];
             redirect('auth/login');
         }
         $this->showtimeModel = $this->model('Showtime');
@@ -42,11 +41,8 @@ class Booking extends Controller
             $showtimeIds[] = $show->id;
         }
 
-        // Get Booked Seat Counts (Only counting tickets on Available seats to avoid double counting locked)
-        $ticketCounts = $this->ticketModel->getTicketCountsOnAvailableSeatsByShowtimeIds($showtimeIds);
-
-        // Get Locked Seat Counts (Unavailable Seats)
-        $lockedSeats = $this->roomModel->getLockedSeatCounts();
+        // Get Booked Seat Counts
+        $ticketCounts = $this->ticketModel->getTicketCountsByShowtimeIds($showtimeIds);
 
         // Extended Movie Info (Mock Data for Demo)
         $movieInfo = [
@@ -70,7 +66,6 @@ class Booking extends Controller
             'movie' => $movie,
             'grouped_showtimes' => $groupedShowtimes,
             'ticket_counts' => $ticketCounts,
-            'locked_seats' => $lockedSeats,
             'movie_info' => $movieInfo,
             'total_seats' => 60,
             'comments' => $comments,
@@ -143,6 +138,10 @@ class Booking extends Controller
             // Better: getSeatsByIds in Room Model?
             // Or just a quick loop since max 10 seats usually.
 
+            $this->roomModel = $this->model('Room'); // Load Room Model
+            $couponModel = $this->model('Coupon'); // Load Coupon Model
+            $availableCoupons = $couponModel->getAvailableCoupons();
+
             $seatCodes = [];
             // Temporary direct DB or loop
             $db = Database::getInstance();
@@ -170,13 +169,52 @@ class Booking extends Controller
                 'room' => $room,
                 'selected_seats' => $selectedSeats,
                 'seat_codes' => $seatCodes,
-                'total_amount' => $totalAmount
+                'total_amount' => $totalAmount,
+                'available_coupons' => $availableCoupons
             ];
 
             $this->view('booking/payment', $data);
-
         } else {
             redirect('pages/index');
+        }
+    }
+
+    public function check_coupon()
+    {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $code = trim($_POST['code']);
+            $totalAmount = floatval($_POST['total_amount']);
+
+            $couponModel = $this->model('Coupon'); // Load Coupon Model
+            $coupon = $couponModel->findCouponByCode($code);
+
+            if ($coupon) {
+                $discountAmount = 0;
+                if ($coupon->discount_type == 'percent') {
+                    $discountAmount = ($totalAmount * $coupon->discount_value) / 100;
+                } else {
+                    $discountAmount = $coupon->discount_value;
+                }
+
+                // Ensure discount doesn't exceed total
+                if ($discountAmount > $totalAmount) {
+                    $discountAmount = $totalAmount;
+                }
+
+                $newTotal = $totalAmount - $discountAmount;
+
+                echo json_encode([
+                    'success' => true,
+                    'discount_amount' => $discountAmount,
+                    'new_total' => $newTotal,
+                    'message' => 'Coupon applied successfully!'
+                ]);
+            } else {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Invalid or failed coupon code.'
+                ]);
+            }
         }
     }
 
@@ -187,14 +225,41 @@ class Booking extends Controller
 
             $showtimeId = $_POST['showtime_id'];
             $selectedSeats = isset($_POST['seats']) ? $_POST['seats'] : [];
+            $couponCode = isset($_POST['coupon_code']) ? trim($_POST['coupon_code']) : null;
+            $paymentMethod = isset($_POST['payment_method']) ? $_POST['payment_method'] : 'online_mock';
 
             if (empty($selectedSeats)) {
                 die('No seats provided');
             }
 
-            // Re-calculate total to prevent tampering? Yes.
+            // Re-calculate total to prevent tampering
             $showtime = $this->showtimeModel->getShowtimeById($showtimeId);
-            $totalAmount = count($selectedSeats) * $showtime->price;
+            $originalAmount = count($selectedSeats) * $showtime->price;
+            $finalAmount = $originalAmount;
+
+            // Server-side Coupon Validation
+            if ($couponCode) {
+                $couponModel = $this->model('Coupon');
+                $coupon = $couponModel->findCouponByCode($couponCode);
+                if ($coupon) {
+                    $discountAmount = 0;
+                    if ($coupon->discount_type == 'percent') {
+                        $discountAmount = ($originalAmount * $coupon->discount_value) / 100;
+                    } else {
+                        $discountAmount = $coupon->discount_value;
+                    }
+                    if ($discountAmount > $originalAmount)
+                        $discountAmount = $originalAmount;
+                    $finalAmount = $originalAmount - $discountAmount;
+                }
+            }
+
+            // Handle Free Payment (Final Amount = 0)
+            if ($finalAmount <= 0) {
+                $finalAmount = 0;
+                $paymentMethod = 'free';
+            }
+
             $userId = $_SESSION['user_id'];
 
             $db = Database::getInstance();
@@ -217,17 +282,21 @@ class Booking extends Controller
                 $db->beginTransaction();
 
                 // 1. Create Order
-                $db->query('INSERT INTO orders (user_id, showtime_id, total_amount, status) VALUES (:uid, :sid, :total, "paid")');
+                $db->query('INSERT INTO orders (user_id, showtime_id, total_amount, original_amount, final_amount, coupon_code, payment_method, status) VALUES (:uid, :sid, :total, :original, :final, :coupon, :method, "paid")');
                 $db->bind(':uid', $userId);
                 $db->bind(':sid', $showtimeId);
-                $db->bind(':total', $totalAmount);
+                $db->bind(':total', $finalAmount);
+                $db->bind(':original', $originalAmount);
+                $db->bind(':final', $finalAmount);
+                $db->bind(':coupon', $couponCode);
+                $db->bind(':method', $paymentMethod);
                 $db->execute();
                 $orderId = $db->lastInsertId();
 
                 // 2. Create Tickets
                 foreach ($selectedSeats as $seatId) {
                     $ticketCode = strtoupper(uniqid('TICKET-'));
-                    $db->query('INSERT INTO tickets (order_id, showtime_id, seat_id, ticket_code, status) VALUES (:oid, :sid, :seatid, :code, "valid")');
+                    $db->query('INSERT INTO tickets (order_id, showtime_id, seat_id, ticket_code) VALUES (:oid, :sid, :seatid, :code)');
                     $db->bind(':oid', $orderId);
                     $db->bind(':sid', $showtimeId);
                     $db->bind(':seatid', $seatId);
@@ -240,7 +309,6 @@ class Booking extends Controller
                 // Redirect to Success
                 flash('booking_success', 'Booking Successful!');
                 redirect('pages/index');
-
             } catch (Exception $e) {
                 $db->cancelTransaction();
                 // Check if error is duplicate entry (SQLSTATE 23000)

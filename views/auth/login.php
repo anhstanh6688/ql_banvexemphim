@@ -27,8 +27,20 @@
                         <span class="invalid-feedback"><?php echo $data['password_err']; ?></span>
                     </div>
 
-                    <div class="d-grid mb-3">
-                        <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm">Login</button>
+                    <div class="row gx-2 mb-3">
+                        <div class="col-6">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm w-100"
+                                style="height: 44px; font-size: 16px;">Login</button>
+                        </div>
+                        <div class="col-6">
+                            <div id="g_id_onload"
+                                data-client_id="495875283176-9i9qvvns1lhkpjqqjjt9u9n5bj90iq7t.apps.googleusercontent.com"
+                                data-callback="handleCredentialResponse" data-auto_prompt="false">
+                            </div>
+                            <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline"
+                                data-text="signin" data-shape="pill" data-logo_alignment="left" style="width: 100%;">
+                            </div>
+                        </div>
                     </div>
                 </form>
 
@@ -40,4 +52,31 @@
         </div>
     </div>
 </div>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+    function handleCredentialResponse(response) {
+        // Send the ID token to your backend via AJAX
+        fetch('<?php echo URLROOT; ?>/auth/google_login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ credential: response.credential })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = data.redirect;
+                } else {
+                    alert('Google Login Failed: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred during Google Login.');
+            });
+    }
+</script>
+
 <?php require APP_ROOT . '/views/inc/footer.php'; ?>
